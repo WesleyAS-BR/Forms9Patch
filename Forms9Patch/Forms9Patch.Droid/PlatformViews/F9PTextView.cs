@@ -20,52 +20,52 @@ namespace Forms9Patch.Droid
     {
         internal delegate bool BoolDelegate();
 
-        static bool _defaultTextSizeInitialized;
+        static bool _defaultsSet;
         static float _defaultTextSize;
         internal static float DefaultTextSize
         {
             get
             {
-                if (!_defaultTextSizeInitialized)
-                {
-                    var systemFontSize = (new TextView(Forms9Patch.Droid.Settings.Context)).TextSize;
-                    _defaultTextSize = systemFontSize / Settings.Context.Resources.DisplayMetrics.Density;
-                    _defaultTextSizeInitialized = true;
-                }
+                if (!_defaultsSet)
+                    SetDefaults();
                 return _defaultTextSize;
             }
         }
 
-        static bool _defaultTextColorArgbIntSet;
         static int _defaultTextColorArgbInt;
         internal static int DefaultTextColorArgbInt
         {
             get
             {
-                if (!_defaultTextColorArgbIntSet)
-                {
-                    _defaultTextColorArgbInt = (new TextView(Forms9Patch.Droid.Settings.Context)).CurrentTextColor;
-                    _defaultTextColorArgbIntSet = true;
-                }
+                if (!_defaultsSet)
+                    SetDefaults();
                 return _defaultTextColorArgbInt;
             }
         }
 
-        static bool _defaultTextColorSet;
         static Android.Graphics.Color _defaultTextColor;
         internal static Android.Graphics.Color DefaultTextColor
         {
             get
             {
-                if (!_defaultTextColorSet)
-                {
-                    _defaultTextColor = new Android.Graphics.Color(DefaultTextColorArgbInt);
-                    _defaultTextColorSet = true;
-                }
+                if (!_defaultsSet)
+                    SetDefaults();
                 return _defaultTextColor;
             }
         }
 
+        static void SetDefaults()
+        {
+            using (var architypeTextView = new TextView(Forms9Patch.Droid.Settings.Context))
+            {
+                var systemFontSize = architypeTextView.TextSize;
+                _defaultTextSize = systemFontSize / Settings.Context.Resources.DisplayMetrics.Density;
+                _defaultTextColorArgbInt = architypeTextView.CurrentTextColor;
+                _defaultTextColor = new Android.Graphics.Color(DefaultTextColorArgbInt);
+                _defaultsSet = true;
+            }
+
+        }
 
         #region Fields
         static int _instances;
