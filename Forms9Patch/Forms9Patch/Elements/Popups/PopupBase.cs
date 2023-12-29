@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using P42.Utils;
 using Forms9Patch.Elements.Popups.Core;
 using System.Collections.Generic;
+using P42.Serilog.QuickLog;
 
 namespace Forms9Patch
 {
@@ -834,7 +835,9 @@ namespace Forms9Patch
             _isPopping = false;
 
             if (IsVisible && !_isPushing)
-                PushAsync().ConfigureAwait(false);
+            {
+                PushAsync().Forget();
+            }
             else
             {
                 _isPopped = true;
@@ -915,7 +918,7 @@ namespace Forms9Patch
         }
 
 
-
+        bool _cancelling;
         /// <summary>
         /// Called to Pop a popup
         /// </summary>
@@ -930,6 +933,10 @@ namespace Forms9Patch
             //System.Diagnostics.Debug.WriteLine(GetType() + "." + ReflectionExtensions.CallerMemberName());
             if (P42.Utils.Environment.IsOnMainThread)
             {
+                if (_cancelling)
+                    return;
+                _cancelling = true;
+
                 Recursion.Enter(GetType(), _id);
 
                 IsVisible = false;
@@ -972,6 +979,7 @@ namespace Forms9Patch
                     while (/*PopupNavigation.Instance.PopupStack.Contains(this) && */!_popAnimationComplete);
 
                 Recursion.Exit(GetType(), _id);
+                _cancelling = false;
             }
             else
 #pragma warning disable RECS0165 // Asynchronous methods should return a Task instead of void
